@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head><title>Специалности</title></head>
+<body>
+<h2>Специалности</h2>
+<a th:href="@{/specialities/new}">Добави нова специалност</a>
+
+<table border="1">
+    <thead>
+    <tr>
+        <th>Специалност</th>
+        <th>Действия</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="speciality : ${specialities}">
+        <td th:text="${speciality.name}"></td>
+        <td>
+            <a th:href="@{/specialities/{id}/edit(id=${speciality.id})}">Редактирай</a>
+            <form th:action="@{/specialities/{id}/delete(id=${speciality.id})}"
+                  method="post" style="display:inline">
+                <button type="submit">Изтрий</button>
+            </form>
+        </td>
+    </tr>
+    </tbody>
+</table>
+</body>
+</html>

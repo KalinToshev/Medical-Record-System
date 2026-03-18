@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head><title>Специалност</title></head>
+<body>
+<h2 th:text="${specialityId} ? 'Редактирай специалност' : 'Нова специалност'"></h2>
+
+<form th:action="${specialityId} ? @{/specialities/{id}/edit(id=${specialityId})} : @{/specialities/new}"
+      th:object="${speciality}" method="post">
+
+    <label>Наименование:
+        <input type="text" th:field="*{name}"/>
+        <span th:if="${#fields.hasErrors('name')}"
+              th:errors="*{name}" style="color:red"></span>
+    </label><br/>
+
+    <button type="submit">Запази</button>
+    <a th:href="@{/specialities}">Откажи</a>
+</form>
+</body>
+</html>

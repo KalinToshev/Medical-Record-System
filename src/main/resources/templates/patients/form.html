@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head><title>Пациент</title></head>
+<body>
+<h2 th:text="${patientId != null} ? 'Редактирай пациент' : 'Нов пациент'"></h2>
+
+<form th:action="${patientId != null} ? @{/patients/{id}/edit(id=${patientId})} : @{/patients/new}"
+      th:object="${patient}" method="post">
+
+    <label>Име:
+        <input type="text" th:field="*{name}"/>
+        <span th:if="${#fields.hasErrors('name')}" th:errors="*{name}" style="color:red"></span>
+    </label><br/>
+
+    <label>ЕГН:
+        <input type="text" th:field="*{egn}"/>
+        <span th:if="${#fields.hasErrors('egn')}" th:errors="*{egn}" style="color:red"></span>
+    </label><br/>
+
+    <label>Личен лекар:
+        <select th:field="*{gpId}">
+            <option value="">-- Избери --</option>
+            <option th:each="gp : ${gps}"
+                    th:value="${gp.id}"
+                    th:text="${gp.name}"></option>
+        </select>
+        <span th:if="${#fields.hasErrors('gpId')}" th:errors="*{gpId}" style="color:red"></span>
+    </label><br/>
+
+    <label th:if="${patientId == null}">Потребител:
+        <select th:field="*{userId}">
+            <option value="">-- Избери --</option>
+            <option th:each="u : ${users}"
+                    th:value="${u.id}"
+                    th:text="${u.username}"></option>
+        </select>
+        <span th:if="${#fields.hasErrors('userId')}" th:errors="*{userId}" style="color:red"></span>
+    </label><br/>
+
+    <label th:if="${patientId != null}">Потребител:
+        <input type="text" th:value="${patientUsername}" readonly/>
+    </label><br/>
+
+    <button type="submit">Запази</button>
+    <a th:href="@{/patients}">Откажи</a>
+</form>
+</body>
+</html>

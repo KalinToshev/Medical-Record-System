@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head><title>Лекар</title></head>
+<body>
+<h2 th:text="${doctorId != null} ? 'Редактирай лекар' : 'Нов лекар'"></h2>
+
+<form th:action="${doctorId != null} ? @{/doctors/{id}/edit(id=${doctorId})} : @{/doctors/new}"
+      th:object="${doctor}" method="post">
+
+    <label>Име:
+        <input type="text" th:field="*{name}"/>
+        <span th:if="${#fields.hasErrors('name')}" th:errors="*{name}" style="color:red"></span>
+    </label><br/>
+
+    <label th:if="${doctorId == null}">Потребител:
+        <select th:field="*{userId}">
+            <option value="">-- Избери --</option>
+            <option th:each="u : ${users}"
+                    th:value="${u.id}"
+                    th:text="${u.username}"></option>
+        </select>
+        <span th:if="${#fields.hasErrors('userId')}"
+              th:errors="*{userId}" style="color:red"></span>
+    </label><br/>
+
+    <label th:if="${doctorId != null}">Потребител:
+        <input type="text" th:value="${doctorUsername}" readonly/>
+    </label><br/>
+
+    <label>Специалност:
+        <select th:field="*{specialityId}">
+            <option value="">-- Избери --</option>
+            <option th:each="s : ${specialities}"
+                    th:value="${s.id}"
+                    th:text="${s.name}"></option>
+        </select>
+        <span th:if="${#fields.hasErrors('specialityId')}" th:errors="*{specialityId}" style="color:red"></span>
+    </label><br/>
+
+    <label>Личен лекар:
+        <input type="checkbox" th:field="*{gp}"/>
+        <span th:if="${#fields.hasErrors('gp')}" th:errors="*{gp}" style="color:red"></span>
+    </label><br/>
+
+    <button type="submit">Запази</button>
+    <a th:href="@{/doctors}">Откажи</a>
+</form>
+</body>
+</html>
