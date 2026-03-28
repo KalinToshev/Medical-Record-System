@@ -8,12 +8,15 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "health_insurances")
+@Table(name = "health_insurances", uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"patient_id", "year", "month"})
+})
 @Getter
 @Setter
 @NoArgsConstructor
