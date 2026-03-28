@@ -13,6 +13,7 @@ import nbu.informatics.medicalRecordSystem.repository.PatientRepository;
 import nbu.informatics.medicalRecordSystem.repository.SpecialityRepository;
 import nbu.informatics.medicalRecordSystem.repository.UserRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -38,6 +39,7 @@ public class DoctorService {
         return toResponseDTO(doctor);
     }
 
+    @Transactional
     public void create(DoctorCreateRequestDTO dto) {
         Speciality speciality = specialityRepository.findById(dto.getSpecialityId())
                 .orElseThrow(() -> new EntityNotFoundException("Специалността не е намерена"));
@@ -54,6 +56,7 @@ public class DoctorService {
         doctorRepository.save(doctor);
     }
 
+    @Transactional
     public void update(Long id, DoctorUpdateRequestDTO dto) {
         Doctor doctor = doctorRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Лекар с id " + id + " не е намерен"));
@@ -78,6 +81,7 @@ public class DoctorService {
         doctorRepository.save(doctor);
     }
 
+    @Transactional
     public void delete(Long id) {
         long linkedPatients = patientRepository.countByGpId(id);
         if (linkedPatients > 0) {
