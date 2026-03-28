@@ -5,8 +5,10 @@ import lombok.RequiredArgsConstructor;
 import nbu.informatics.medicalRecordSystem.model.dto.speciality.SpecialityRequestDTO;
 import nbu.informatics.medicalRecordSystem.model.dto.speciality.SpecialityResponseDTO;
 import nbu.informatics.medicalRecordSystem.model.entity.Speciality;
+import nbu.informatics.medicalRecordSystem.repository.DoctorRepository;
 import nbu.informatics.medicalRecordSystem.repository.SpecialityRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -15,6 +17,7 @@ import java.util.List;
 public class SpecialityService {
 
     private final SpecialityRepository specialityRepository;
+    private final DoctorRepository doctorRepository;
 
     public List<SpecialityResponseDTO> findAll() {
         return specialityRepository.findAll()
@@ -29,6 +32,7 @@ public class SpecialityService {
         return toResponseDTO(speciality);
     }
 
+    @Transactional
     public void create(SpecialityRequestDTO specialityRequestDTO) {
         Speciality speciality = new Speciality();
         speciality.setName(specialityRequestDTO.getName());
@@ -36,6 +40,7 @@ public class SpecialityService {
         specialityRepository.save(speciality);
     }
 
+    @Transactional
     public void update(Long id, SpecialityRequestDTO specialityRequestDTO) {
         Speciality speciality = specialityRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Специалност с id " + id + " не е намерена"));
@@ -45,7 +50,15 @@ public class SpecialityService {
         specialityRepository.save(speciality);
     }
 
+    @Transactional
     public void delete(Long id) {
+        long linkedDoctors = doctorRepository.countBySpecialityId(id);
+        if (linkedDoctors > 0) {
+            throw new IllegalStateException(
+                    "Специалността не може да бъде изтрита, защото има "
+                            + linkedDoctors + " обвързан(и) лекар(и)"
+            );
+        }
         specialityRepository.deleteById(id);
     }
 
