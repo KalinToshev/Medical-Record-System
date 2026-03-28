@@ -13,3 +13,5 @@ spring:
       hibernate:
         format_sql: true
     open-in-view: false
+server:
+  port: 9090
