@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout(~{::title}, ~{::section})}">
+<head><title>Чакащи потребители — МедДосие</title></head>
+<body>
+<section>
+    <h1 style="font-family:'DM Serif Display',serif" class="text-3xl text-slate-800 mb-6">
+        Чакащи потребители
+    </h1>
+
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+        <table class="w-full text-sm">
+            <thead>
+            <tr class="bg-slate-50 border-b border-slate-100">
+                <th class="text-left px-6 py-4 text-xs font-semibold text-slate-500 uppercase">ID</th>
+                <th class="text-left px-6 py-4 text-xs font-semibold text-slate-500 uppercase">Потребителско име</th>
+                <th class="px-6 py-4"></th>
+            </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-50">
+            <tr th:each="u : ${pendingUsers}" class="hover:bg-slate-50">
+                <td class="px-6 py-4 text-slate-500" th:text="${u.id}"></td>
+                <td class="px-6 py-4 font-medium text-slate-800" th:text="${u.username}"></td>
+                <td class="px-6 py-4 text-right">
+                    <a th:href="@{/admin/users/{id}/assign(id=${u.id})}"
+                       class="px-3 py-1.5 text-xs font-medium text-teal-700 bg-teal-50 hover:bg-teal-100 rounded-lg transition-colors">
+                        Назначи роля
+                    </a>
+                </td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(pendingUsers)}">
+                <td colspan="3" class="px-6 py-12 text-center text-slate-400">
+                    Няма чакащи потребители
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</section>
+</body>
+</html>

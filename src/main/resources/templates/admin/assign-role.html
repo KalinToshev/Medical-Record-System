@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout(~{::title}, ~{::section})}">
+<head><title>Назначи роля — МедДосие</title></head>
+<body>
+<section>
+    <div class="max-w-lg mx-auto">
+        <h1 style="font-family:'DM Serif Display',serif" class="text-3xl text-slate-800 mb-6">
+            Назначи роля
+        </h1>
+
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-8">
+            <form th:action="@{/admin/users/{id}/assign(id=${userId})}"
+                  th:object="${form}" method="post" class="space-y-5"
+                  x-data="{ role: '' }">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Роля</label>
+                    <select th:field="*{role}" x-model="role"
+                            class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500">
+                        <option value="">— Изберете роля —</option>
+                        <option value="PATIENT">Пациент</option>
+                        <option value="DOCTOR">Лекар</option>
+                    </select>
+                    <p th:if="${#fields.hasErrors('role')}" th:errors="*{role}"
+                       class="text-red-500 text-xs mt-1"></p>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Пълно име</label>
+                    <input type="text" th:field="*{name}"
+                           class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"/>
+                    <p th:if="${#fields.hasErrors('name')}" th:errors="*{name}"
+                       class="text-red-500 text-xs mt-1"></p>
+                </div>
+
+                <!-- Само за PATIENT -->
+                <template x-if="role === 'PATIENT'">
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">ЕГН</label>
+                            <input type="text" th:field="*{egn}" maxlength="10"
+                                   class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"/>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Личен лекар (ОПЛ)</label>
+                            <select th:field="*{gpId}"
+                                    class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500">
+                                <option value="">— Изберете ОПЛ —</option>
+                                <option th:each="gp : ${gps}" th:value="${gp.id}" th:text="${gp.name}"></option>
+                            </select>
+                        </div>
+                    </div>
+                </template>
+
+                <!-- Само за DOCTOR -->
+                <template x-if="role === 'DOCTOR'">
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Специалност</label>
+                            <select th:field="*{specialityId}"
+                                    class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500">
+                                <option value="">— Изберете специалност —</option>
+                                <option th:each="s : ${specialities}" th:value="${s.id}" th:text="${s.name}"></option>
+                            </select>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <input type="checkbox" th:field="*{gp}" id="isGp"
+                                   class="rounded border-slate-300 text-teal-600"/>
+                            <label for="isGp" class="text-sm text-slate-700">Личен лекар (ОПЛ)</label>
+                        </div>
+                    </div>
+                </template>
+
+                <div class="flex gap-3 pt-2">
+                    <button type="submit"
+                            class="flex-1 bg-teal-700 hover:bg-teal-800 text-white py-2.5 rounded-lg text-sm font-medium transition-colors">
+                        Запази
+                    </button>
+                    <a th:href="@{/admin/users/pending}"
+                       class="flex-1 text-center border border-slate-200 text-slate-600 hover:bg-slate-50 py-2.5 rounded-lg text-sm font-medium transition-colors">
+                        Отказ
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+</body>
+</html>
