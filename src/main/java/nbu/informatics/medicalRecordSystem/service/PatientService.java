@@ -9,9 +9,11 @@ import nbu.informatics.medicalRecordSystem.model.entity.Doctor;
 import nbu.informatics.medicalRecordSystem.model.entity.Patient;
 import nbu.informatics.medicalRecordSystem.model.entity.User;
 import nbu.informatics.medicalRecordSystem.repository.DoctorRepository;
+import nbu.informatics.medicalRecordSystem.repository.ExaminationRepository;
 import nbu.informatics.medicalRecordSystem.repository.PatientRepository;
 import nbu.informatics.medicalRecordSystem.repository.UserRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -22,6 +24,7 @@ public class PatientService {
     private final PatientRepository patientRepository;
     private final DoctorRepository doctorRepository;
     private final UserRepository userRepository;
+    private final ExaminationRepository examinationRepository;
 
     public List<PatientResponseDTO> findAll() {
         return patientRepository.findAll()
@@ -36,6 +39,7 @@ public class PatientService {
         return toResponseDTO(patient);
     }
 
+    @Transactional
     public void create(PatientCreateRequestDTO dto) {
         Doctor gp = doctorRepository.findById(dto.getGpId())
                 .orElseThrow(() -> new EntityNotFoundException("Личният лекар не е намерен"));
@@ -52,6 +56,7 @@ public class PatientService {
         patientRepository.save(patient);
     }
 
+    @Transactional
     public void update(Long id, PatientUpdateRequestDTO dto) {
         Patient patient = patientRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Пациент с id " + id + " не е намерен"));
@@ -66,7 +71,15 @@ public class PatientService {
         patientRepository.save(patient);
     }
 
+    @Transactional
     public void delete(Long id) {
+        long linkedExaminations = examinationRepository.countByPatientId(id);
+        if (linkedExaminations > 0) {
+            throw new IllegalStateException(
+                    "Пациентът не може да бъде изтрит, защото има "
+                            + linkedExaminations + " обвързани преглед(а)"
+            );
+        }
         patientRepository.deleteById(id);
     }
 
