@@ -21,4 +21,3 @@ public class DoctorCreateRequestDTO {
     @NotNull(message = "Потребителят е задължителен")
     private Long userId;
 }
-

@@ -18,4 +18,3 @@ public class DoctorUpdateRequestDTO {
     @NotNull(message = "Специалността е задължителна")
     private Long specialityId;
 }
-
