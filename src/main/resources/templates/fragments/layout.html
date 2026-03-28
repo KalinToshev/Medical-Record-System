@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:fragment="layout(title, content)">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title th:replace="${title}">Медицинско досие</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com"/>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin=""/>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Serif+Display&display=swap" rel="stylesheet"/>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['DM Sans', 'sans-serif'],
+                        serif: ['DM Serif Display', 'serif'],
+                    },
+                    colors: {
+                        teal: {
+                            50:  '#f0fdfa',
+                            100: '#ccfbf1',
+                            500: '#14b8a6',
+                            600: '#0d9488',
+                            700: '#0f766e',
+                            800: '#115e59',
+                            900: '#0f4c5c',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'DM Sans', sans-serif; }
+        .sidebar-link { transition: all 0.2s ease; }
+        .sidebar-link:hover { transform: translateX(4px); }
+        .fade-in { animation: fadeIn 0.4s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        .card { transition: box-shadow 0.2s ease; }
+        .card:hover { box-shadow: 0 8px 30px rgba(15,76,92,0.1); }
+        input:focus, select:focus, textarea:focus { outline: none; border-color: #0d9488; box-shadow: 0 0 0 3px rgba(13,148,136,0.15); }
+        tr { transition: background 0.15s ease; }
+    </style>
+</head>
+<body class="bg-slate-50 min-h-screen">
+
+<div class="flex min-h-screen">
+
+    <!-- Sidebar — само за логнати потребители -->
+    <aside sec:authorize="isAuthenticated()"
+           class="w-64 bg-teal-900 text-white flex flex-col fixed h-full shadow-2xl z-10">
+        <!-- Logo -->
+        <div class="px-6 py-8 border-b border-teal-800">
+            <div class="flex items-center gap-3">
+                <div class="w-9 h-9 bg-teal-500 rounded-lg flex items-center justify-center">
+                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+                    </svg>
+                </div>
+                <div>
+                    <p class="font-serif text-lg leading-tight">МедДосие</p>
+                    <p class="text-teal-400 text-xs font-light">Медицинска система</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <nav class="flex-1 px-4 py-6 space-y-1">
+
+            <!-- ADMIN links -->
+            <div sec:authorize="hasRole('ADMIN')">
+                <p class="text-teal-400 text-xs font-semibold uppercase tracking-widest px-3 mb-3">Управление</p>
+                <a th:href="@{/doctors}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-teal-100 hover:bg-teal-800 hover:text-white text-sm font-medium">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                    Лекари
+                </a>
+                <a th:href="@{/patients}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-teal-100 hover:bg-teal-800 hover:text-white text-sm font-medium">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0"/></svg>
+                    Пациенти
+                </a>
+                <a th:href="@{/specialities}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-teal-100 hover:bg-teal-800 hover:text-white text-sm font-medium">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                    Специалности
+                </a>
+                <a th:href="@{/diagnoses}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-teal-100 hover:bg-teal-800 hover:text-white text-sm font-medium">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                    Диагнози
+                </a>
+                <div class="my-3 border-t border-teal-800"></div>
+                <a th:href="@{/admin/users/pending}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-teal-100 hover:bg-teal-800 hover:text-white text-sm font-medium">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                    Чакащи потребители
+                </a>
+                <div class="my-3 border-t border-teal-800"></div>
+                <a th:href="@{/reports}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-teal-100 hover:bg-teal-800 hover:text-white text-sm font-medium">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+                    Справки
+                </a>
+            </div>
+
+            <!-- DOCTOR + PATIENT links -->
+            <div sec:authorize="hasAnyRole('DOCTOR','PATIENT','ADMIN')">
+                <div class="my-3 border-t border-teal-800" sec:authorize="hasRole('ADMIN')"></div>
+                <p class="text-teal-400 text-xs font-semibold uppercase tracking-widest px-3 mb-3">Прегледи</p>
+                <a th:href="@{/examinations}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-teal-100 hover:bg-teal-800 hover:text-white text-sm font-medium">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg>
+                    Прегледи
+                </a>
+            </div>
+        </nav>
+
+        <!-- User info + logout -->
+        <div class="px-4 py-5 border-t border-teal-800">
+            <div class="flex items-center gap-3 mb-3 px-2">
+                <div class="w-8 h-8 bg-teal-600 rounded-full flex items-center justify-center text-sm font-semibold">
+                    <span class="uppercase" th:text="${#strings.substring(#authentication.name, 0, 1)}">U</span>
+                </div>
+                <div>
+                    <p class="text-white text-sm font-medium" sec:authentication="name">Потребител</p>
+                    <p class="text-teal-400 text-xs" sec:authentication="principal.authorities">Роля</p>
+                </div>
+            </div>
+            <form th:action="@{/logout}" method="post">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                <button type="submit" class="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-teal-300 hover:bg-teal-800 hover:text-white text-sm transition-colors">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+                    Изход
+                </button>
+            </form>
+        </div>
+    </aside>
+
+    <!-- Main content -->
+    <main th:class="${#authorization.expression('isAuthenticated()')} ? 'ml-64 flex-1 p-8 fade-in' : 'flex-1 p-8 fade-in'">
+        <div th:replace="${content}">Съдържание</div>
+    </main>
+
+</div>
+
+</body>
+</html>
