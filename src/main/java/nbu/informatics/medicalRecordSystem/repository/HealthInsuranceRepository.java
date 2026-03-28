@@ -8,4 +8,8 @@ import java.util.List;
 
 public interface HealthInsuranceRepository extends JpaRepository<HealthInsurance, Long> {
     List<HealthInsurance> findByPatient(Patient patient);
+
+    boolean existsByPatientAndYearAndMonthAndPaidTrue(Patient patient, int year, int month);
+
+    boolean existsByPatientAndYearAndMonth(Patient patient, int year, int month);
 }
