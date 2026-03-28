@@ -1,0 +1,85 @@
+package nbu.informatics.medicalRecordSystem.service;
+
+import jakarta.persistence.EntityNotFoundException;
+import lombok.RequiredArgsConstructor;
+import nbu.informatics.medicalRecordSystem.model.dto.healthInsurance.HealthInsuranceRequestDTO;
+import nbu.informatics.medicalRecordSystem.model.dto.healthInsurance.HealthInsuranceResponseDTO;
+import nbu.informatics.medicalRecordSystem.model.entity.HealthInsurance;
+import nbu.informatics.medicalRecordSystem.model.entity.Patient;
+import nbu.informatics.medicalRecordSystem.repository.HealthInsuranceRepository;
+import nbu.informatics.medicalRecordSystem.repository.PatientRepository;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+
+@Service
+@RequiredArgsConstructor
+public class HealthInsuranceService {
+
+    private final HealthInsuranceRepository healthInsuranceRepository;
+    private final PatientRepository patientRepository;
+
+    public List<HealthInsuranceResponseDTO> findByPatient(Long patientId) {
+        Patient patient = getPatientOrThrow(patientId);
+        return healthInsuranceRepository.findByPatient(patient)
+                .stream()
+                .map(this::toResponseDTO)
+                .toList();
+    }
+
+    @Transactional
+    public void create(Long patientId, HealthInsuranceRequestDTO dto) {
+        Patient patient = getPatientOrThrow(patientId);
+
+        boolean alreadyExists = healthInsuranceRepository
+                .existsByPatientAndYearAndMonth(patient, dto.getYear(), dto.getMonth());
+
+        if (alreadyExists) {
+            throw new IllegalStateException(
+                    "Вече съществува запис за " + dto.getMonth() + "/" + dto.getYear()
+            );
+        }
+
+        HealthInsurance insurance = new HealthInsurance();
+        insurance.setPatient(patient);
+        insurance.setYear(dto.getYear());
+        insurance.setMonth(dto.getMonth());
+        insurance.setPaid(dto.isPaid());
+
+        try {
+            healthInsuranceRepository.save(insurance);
+        } catch (org.springframework.dao.DataIntegrityViolationException e) {
+            throw new IllegalStateException(
+                    "Вече съществува запис за " + dto.getMonth() + "/" + dto.getYear()
+            );
+        }
+    }
+
+    @Transactional
+    public void delete(Long patientId, Long insuranceId) {
+        HealthInsurance insurance = healthInsuranceRepository.findById(insuranceId)
+                .orElseThrow(() -> new EntityNotFoundException("Записът не е намерен"));
+
+        if (!insurance.getPatient().getId().equals(patientId)) {
+            throw new AccessDeniedException("Нямате право да изтриете този запис");
+        }
+
+        healthInsuranceRepository.deleteById(insuranceId);
+    }
+
+    private Patient getPatientOrThrow(Long patientId) {
+        return patientRepository.findById(patientId)
+                .orElseThrow(() -> new EntityNotFoundException("Пациентът не е намерен"));
+    }
+
+    private HealthInsuranceResponseDTO toResponseDTO(HealthInsurance insurance) {
+        return new HealthInsuranceResponseDTO(
+                insurance.getId(),
+                insurance.getYear(),
+                insurance.getMonth(),
+                insurance.isPaid()
+        );
+    }
+}
