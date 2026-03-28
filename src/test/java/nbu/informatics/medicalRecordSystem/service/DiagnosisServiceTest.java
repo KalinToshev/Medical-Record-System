@@ -5,6 +5,7 @@ import nbu.informatics.medicalRecordSystem.model.dto.diagnosis.DiagnosisRequestD
 import nbu.informatics.medicalRecordSystem.model.dto.diagnosis.DiagnosisResponseDTO;
 import nbu.informatics.medicalRecordSystem.model.entity.Diagnosis;
 import nbu.informatics.medicalRecordSystem.repository.DiagnosisRepository;
+import nbu.informatics.medicalRecordSystem.repository.ExaminationRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -26,6 +27,8 @@ class DiagnosisServiceTest {
 
     @Mock
     private DiagnosisRepository diagnosisRepository;
+    @Mock
+    private ExaminationRepository examinationRepository;
     @InjectMocks
     private DiagnosisService diagnosisService;
 
@@ -85,7 +88,10 @@ class DiagnosisServiceTest {
 
     @Test
     void delete_callsRepository() {
+        when(examinationRepository.countByDiagnosisId(1L)).thenReturn(0L);
+
         diagnosisService.delete(1L);
+
         verify(diagnosisRepository).deleteById(1L);
     }
 }

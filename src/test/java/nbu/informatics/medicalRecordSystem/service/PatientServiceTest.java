@@ -10,6 +10,7 @@ import nbu.informatics.medicalRecordSystem.model.entity.Speciality;
 import nbu.informatics.medicalRecordSystem.model.entity.User;
 import nbu.informatics.medicalRecordSystem.model.role.Role;
 import nbu.informatics.medicalRecordSystem.repository.DoctorRepository;
+import nbu.informatics.medicalRecordSystem.repository.ExaminationRepository;
 import nbu.informatics.medicalRecordSystem.repository.PatientRepository;
 import nbu.informatics.medicalRecordSystem.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -38,6 +39,8 @@ class PatientServiceTest {
     private DoctorRepository doctorRepository;
     @Mock
     private UserRepository userRepository;
+    @Mock
+    private ExaminationRepository examinationRepository;
 
     @InjectMocks
     private PatientService patientService;
@@ -197,7 +200,10 @@ class PatientServiceTest {
 
     @Test
     void delete_callsRepository() {
+        when(examinationRepository.countByPatientId(1L)).thenReturn(0L);
+
         patientService.delete(1L);
+
         verify(patientRepository).deleteById(1L);
     }
 }

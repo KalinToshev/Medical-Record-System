@@ -4,6 +4,7 @@ import jakarta.persistence.EntityNotFoundException;
 import nbu.informatics.medicalRecordSystem.model.dto.speciality.SpecialityRequestDTO;
 import nbu.informatics.medicalRecordSystem.model.dto.speciality.SpecialityResponseDTO;
 import nbu.informatics.medicalRecordSystem.model.entity.Speciality;
+import nbu.informatics.medicalRecordSystem.repository.DoctorRepository;
 import nbu.informatics.medicalRecordSystem.repository.SpecialityRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -26,6 +27,8 @@ class SpecialityServiceTest {
 
     @Mock
     private SpecialityRepository specialityRepository;
+    @Mock
+    private DoctorRepository doctorRepository;
     @InjectMocks
     private SpecialityService specialityService;
 
@@ -85,7 +88,10 @@ class SpecialityServiceTest {
 
     @Test
     void delete_callsRepository() {
+        when(doctorRepository.countBySpecialityId(1L)).thenReturn(0L);
+
         specialityService.delete(1L);
+
         verify(specialityRepository).deleteById(1L);
     }
 }
