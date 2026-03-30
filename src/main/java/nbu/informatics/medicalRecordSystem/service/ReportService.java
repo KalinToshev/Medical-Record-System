@@ -3,6 +3,9 @@ package nbu.informatics.medicalRecordSystem.service;
 import lombok.RequiredArgsConstructor;
 import nbu.informatics.medicalRecordSystem.model.dto.examination.ExaminationResponseDTO;
 import nbu.informatics.medicalRecordSystem.model.dto.patient.PatientResponseDTO;
+import nbu.informatics.medicalRecordSystem.model.dto.report.MonthCountProjection;
+import nbu.informatics.medicalRecordSystem.model.dto.report.NameAmountProjection;
+import nbu.informatics.medicalRecordSystem.model.dto.report.NameCountProjection;
 import nbu.informatics.medicalRecordSystem.model.entity.Examination;
 import nbu.informatics.medicalRecordSystem.model.entity.Patient;
 import nbu.informatics.medicalRecordSystem.repository.ExaminationRepository;
@@ -42,7 +45,7 @@ public class ReportService {
                 .stream().map(this::toPatientDTO).toList();
     }
 
-    public List<Object[]> countPatientsPerGp() {
+    public List<NameCountProjection> countPatientsPerGp() {
         return patientRepository.countPerGp();
     }
 
@@ -73,7 +76,7 @@ public class ReportService {
         return results.stream().map(this::toExaminationDTO).toList();
     }
 
-    public List<Object[]> countExaminationsPerDoctor() {
+    public List<NameCountProjection> countExaminationsPerDoctor() {
         return examinationRepository.countPerDoctor();
     }
 
@@ -82,29 +85,27 @@ public class ReportService {
         return result != null ? result : BigDecimal.ZERO;
     }
 
-    public List<Object[]> totalPaidByPatientsPerDoctor() {
+    public List<NameAmountProjection> totalPaidByPatientsPerDoctor() {
         return examinationRepository.totalPaidByPatientsPerDoctor();
     }
 
     public String mostCommonDiagnosis() {
-        List<Object[]> results = examinationRepository.diagnosisFrequency();
-        return results.isEmpty() ? "Няма данни" : (String) results.getFirst()[0];
+        List<NameCountProjection> results = examinationRepository.diagnosisFrequency();
+        return results.isEmpty() ? "Няма данни" : results.getFirst().name();
     }
 
     public String monthWithMostSickLeaves() {
-        List<Object[]> results = sickLeaveRepository.countPerMonth();
+        List<MonthCountProjection> results = sickLeaveRepository.countPerMonth();
         if (results.isEmpty()) return "Няма данни";
-        Object[] top = results.getFirst();
-        int year = ((Number) top[0]).intValue();
-        int month = ((Number) top[1]).intValue();
-        return month + "/" + year;
+        MonthCountProjection top = results.getFirst();
+        return top.month() + "/" + top.year();
     }
 
-    public List<Object[]> doctorsWithMostSickLeaves() {
-        List<Object[]> all = sickLeaveRepository.countPerDoctor();
+    public List<NameCountProjection> doctorsWithMostSickLeaves() {
+        List<NameCountProjection> all = sickLeaveRepository.countPerDoctor();
         if (all.isEmpty()) return List.of();
-        Long max = (Long) all.getFirst()[1];
-        return all.stream().filter(r -> r[1].equals(max)).toList();
+        Long max = all.getFirst().count();
+        return all.stream().filter(r -> r.count().equals(max)).toList();
     }
 
     private ExaminationResponseDTO toExaminationDTO(Examination e) {

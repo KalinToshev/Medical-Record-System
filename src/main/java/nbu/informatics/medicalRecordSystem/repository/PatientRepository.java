@@ -1,5 +1,6 @@
 package nbu.informatics.medicalRecordSystem.repository;
 
+import nbu.informatics.medicalRecordSystem.model.dto.report.NameCountProjection;
 import nbu.informatics.medicalRecordSystem.model.entity.Patient;
 import nbu.informatics.medicalRecordSystem.model.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -17,6 +18,7 @@ public interface PatientRepository extends JpaRepository<Patient, Long> {
     @Query("SELECT p FROM Patient p WHERE p.gp.id = :gpId")
     List<Patient> findByGpId(@Param("gpId") Long gpId);
 
-    @Query("SELECT p.gp.name, COUNT(p) FROM Patient p GROUP BY p.gp.name")
-    List<Object[]> countPerGp();
+    @Query("SELECT new nbu.informatics.medicalRecordSystem.model.dto.report.NameCountProjection(p.gp.name, COUNT(p)) " +
+            "FROM Patient p GROUP BY p.gp.name")
+    List<NameCountProjection> countPerGp();
 }
