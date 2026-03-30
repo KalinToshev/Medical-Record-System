@@ -6,30 +6,20 @@ import nbu.informatics.medicalRecordSystem.model.entity.Doctor;
 import nbu.informatics.medicalRecordSystem.model.entity.Examination;
 import nbu.informatics.medicalRecordSystem.model.entity.Patient;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.List;
 
-public interface ExaminationRepository extends JpaRepository<Examination, Long> {
+public interface ExaminationRepository extends JpaRepository<Examination, Long>, JpaSpecificationExecutor<Examination> {
     List<Examination> findByDoctor(Doctor doctor);
 
     List<Examination> findByPatient(Patient patient);
 
     @Query("SELECT e FROM Examination e WHERE e.diagnosis.id = :diagnosisId")
     List<Examination> findByDiagnosisId(@Param("diagnosisId") Long diagnosisId);
-
-    List<Examination> findByDoctorId(Long doctorId);
-
-    List<Examination> findByDoctorIdAndDateTimeBetween(Long doctorId, LocalDateTime from, LocalDateTime to);
-
-    List<Examination> findByDoctorIdAndDateTimeAfter(Long doctorId, LocalDateTime from);
-
-    List<Examination> findByDoctorIdAndDateTimeBefore(Long doctorId, LocalDateTime to);
-
-    List<Examination> findByDateTimeBetween(LocalDateTime from, LocalDateTime to);
 
     @Query("SELECT SUM(e.price) FROM Examination e WHERE e.paidBy = 'PATIENT'")
     BigDecimal totalPaidByPatients();

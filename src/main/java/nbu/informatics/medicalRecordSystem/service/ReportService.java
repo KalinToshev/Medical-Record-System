@@ -9,8 +9,10 @@ import nbu.informatics.medicalRecordSystem.model.dto.report.NameCountProjection;
 import nbu.informatics.medicalRecordSystem.model.entity.Examination;
 import nbu.informatics.medicalRecordSystem.model.entity.Patient;
 import nbu.informatics.medicalRecordSystem.repository.ExaminationRepository;
+import nbu.informatics.medicalRecordSystem.repository.ExaminationSpecifications;
 import nbu.informatics.medicalRecordSystem.repository.PatientRepository;
 import nbu.informatics.medicalRecordSystem.repository.SickLeaveRepository;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -57,23 +59,22 @@ public class ReportService {
     public List<ExaminationResponseDTO> findByDoctorAndPeriod(
             Long doctorId, LocalDateTime from, LocalDateTime to) {
 
-        List<Examination> results;
+        Specification<Examination> spec = Specification.unrestricted();
 
-        if (doctorId != null && from != null && to != null) {
-            results = examinationRepository.findByDoctorIdAndDateTimeBetween(doctorId, from, to);
-        } else if (doctorId != null && from != null) {
-            results = examinationRepository.findByDoctorIdAndDateTimeAfter(doctorId, from);
-        } else if (doctorId != null && to != null) {
-            results = examinationRepository.findByDoctorIdAndDateTimeBefore(doctorId, to);
-        } else if (doctorId != null) {
-            results = examinationRepository.findByDoctorId(doctorId);
-        } else if (from != null && to != null) {
-            results = examinationRepository.findByDateTimeBetween(from, to);
-        } else {
-            results = examinationRepository.findAll();
+        if (doctorId != null) {
+            spec = spec.and(ExaminationSpecifications.hasDoctor(doctorId));
+        }
+        if (from != null) {
+            spec = spec.and(ExaminationSpecifications.dateAfter(from));
+        }
+        if (to != null) {
+            spec = spec.and(ExaminationSpecifications.dateBefore(to));
         }
 
-        return results.stream().map(this::toExaminationDTO).toList();
+        return examinationRepository.findAll(spec)
+                .stream()
+                .map(this::toExaminationDTO)
+                .toList();
     }
 
     public List<NameCountProjection> countExaminationsPerDoctor() {
