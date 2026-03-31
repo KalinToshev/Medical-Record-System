@@ -6,9 +6,9 @@ import nbu.informatics.medicalRecordSystem.model.dto.doctor.DoctorCreateRequestD
 import nbu.informatics.medicalRecordSystem.model.dto.doctor.DoctorResponseDTO;
 import nbu.informatics.medicalRecordSystem.model.dto.doctor.DoctorUpdateRequestDTO;
 import nbu.informatics.medicalRecordSystem.model.role.Role;
-import nbu.informatics.medicalRecordSystem.repository.UserRepository;
 import nbu.informatics.medicalRecordSystem.service.DoctorService;
 import nbu.informatics.medicalRecordSystem.service.SpecialityService;
+import nbu.informatics.medicalRecordSystem.service.UserService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -26,7 +26,7 @@ public class DoctorController {
 
     private final DoctorService doctorService;
     private final SpecialityService specialityService;
-    private final UserRepository userRepository;
+    private final UserService userService;
 
     @GetMapping
     public String list(Model model) {
@@ -38,7 +38,7 @@ public class DoctorController {
     public String createForm(Model model) {
         model.addAttribute("doctor", new DoctorCreateRequestDTO());
         model.addAttribute("specialities", specialityService.findAll());
-        model.addAttribute("users", userRepository.findByRole(Role.DOCTOR));
+        model.addAttribute("users", userService.findByRole(Role.DOCTOR));
         return "doctors/form";
     }
 
@@ -48,7 +48,7 @@ public class DoctorController {
                          Model model) {
         if (result.hasErrors()) {
             model.addAttribute("specialities", specialityService.findAll());
-            model.addAttribute("users", userRepository.findByRole(Role.DOCTOR));
+            model.addAttribute("users", userService.findByRole(Role.DOCTOR));
             return "doctors/form";
         }
 
