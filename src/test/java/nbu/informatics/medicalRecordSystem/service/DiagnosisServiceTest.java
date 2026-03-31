@@ -1,6 +1,7 @@
 package nbu.informatics.medicalRecordSystem.service;
 
 import jakarta.persistence.EntityNotFoundException;
+import nbu.informatics.medicalRecordSystem.mapper.DiagnosisMapper;
 import nbu.informatics.medicalRecordSystem.model.dto.diagnosis.DiagnosisRequestDTO;
 import nbu.informatics.medicalRecordSystem.model.dto.diagnosis.DiagnosisResponseDTO;
 import nbu.informatics.medicalRecordSystem.model.entity.Diagnosis;
@@ -29,21 +30,29 @@ class DiagnosisServiceTest {
     private DiagnosisRepository diagnosisRepository;
     @Mock
     private ExaminationRepository examinationRepository;
+    @Mock
+    private DiagnosisMapper diagnosisMapper;
     @InjectMocks
     private DiagnosisService diagnosisService;
 
     private Diagnosis diagnosis;
+    private DiagnosisResponseDTO diagnosisResponseDTO;
 
     @BeforeEach
     void setUp() {
         diagnosis = new Diagnosis();
         diagnosis.setId(1L);
         diagnosis.setName("Грип");
+
+        diagnosisResponseDTO = new DiagnosisResponseDTO();
+        diagnosisResponseDTO.setId(1L);
+        diagnosisResponseDTO.setName("Грип");
     }
 
     @Test
     void findAll_returnsMappedDTOs() {
         when(diagnosisRepository.findAll()).thenReturn(List.of(diagnosis));
+        when(diagnosisMapper.toDto(diagnosis)).thenReturn(diagnosisResponseDTO);
         List<DiagnosisResponseDTO> result = diagnosisService.findAll();
         assertEquals(1, result.size());
         assertEquals("Грип", result.getFirst().getName());
@@ -52,6 +61,7 @@ class DiagnosisServiceTest {
     @Test
     void findById_existingId_returnsDTO() {
         when(diagnosisRepository.findById(1L)).thenReturn(Optional.of(diagnosis));
+        when(diagnosisMapper.toDto(diagnosis)).thenReturn(diagnosisResponseDTO);
         assertEquals("Грип", diagnosisService.findById(1L).getName());
     }
 

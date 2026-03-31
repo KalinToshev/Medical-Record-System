@@ -2,6 +2,7 @@ package nbu.informatics.medicalRecordSystem.service;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import nbu.informatics.medicalRecordSystem.mapper.PatientMapper;
 import nbu.informatics.medicalRecordSystem.model.dto.patient.PatientCreateRequestDTO;
 import nbu.informatics.medicalRecordSystem.model.dto.patient.PatientResponseDTO;
 import nbu.informatics.medicalRecordSystem.model.dto.patient.PatientUpdateRequestDTO;
@@ -25,18 +26,19 @@ public class PatientService {
     private final DoctorRepository doctorRepository;
     private final UserRepository userRepository;
     private final ExaminationRepository examinationRepository;
+    private final PatientMapper patientMapper;
 
     public List<PatientResponseDTO> findAll() {
         return patientRepository.findAll()
                 .stream()
-                .map(this::toResponseDTO)
+                .map(patientMapper::toDto)
                 .toList();
     }
 
     public PatientResponseDTO findById(Long id) {
         Patient patient = patientRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Пациент с id " + id + " не е намерен"));
-        return toResponseDTO(patient);
+        return patientMapper.toDto(patient);
     }
 
     @Transactional
@@ -81,16 +83,5 @@ public class PatientService {
             );
         }
         patientRepository.deleteById(id);
-    }
-
-    private PatientResponseDTO toResponseDTO(Patient patient) {
-        return new PatientResponseDTO(
-                patient.getId(),
-                patient.getName(),
-                patient.getEgn(),
-                patient.getGp().getId(),
-                patient.getGp().getName(),
-                patient.getUser().getUsername()
-        );
     }
 }

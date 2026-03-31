@@ -1,6 +1,7 @@
 package nbu.informatics.medicalRecordSystem.service;
 
 import jakarta.persistence.EntityNotFoundException;
+import nbu.informatics.medicalRecordSystem.mapper.SpecialityMapper;
 import nbu.informatics.medicalRecordSystem.model.dto.speciality.SpecialityRequestDTO;
 import nbu.informatics.medicalRecordSystem.model.dto.speciality.SpecialityResponseDTO;
 import nbu.informatics.medicalRecordSystem.model.entity.Speciality;
@@ -31,19 +32,27 @@ class SpecialityServiceTest {
     private DoctorRepository doctorRepository;
     @InjectMocks
     private SpecialityService specialityService;
+    @Mock
+    private SpecialityMapper specialityMapper;
 
     private Speciality speciality;
+    private SpecialityResponseDTO specialityResponseDTO;
 
     @BeforeEach
     void setUp() {
         speciality = new Speciality();
         speciality.setId(1L);
         speciality.setName("Кардиология");
+
+        specialityResponseDTO = new SpecialityResponseDTO();
+        specialityResponseDTO.setId(1L);
+        specialityResponseDTO.setName("Кардиология");
     }
 
     @Test
     void findAll_returnsMappedDTOs() {
         when(specialityRepository.findAll()).thenReturn(List.of(speciality));
+        when(specialityMapper.toDto(speciality)).thenReturn(specialityResponseDTO);
         List<SpecialityResponseDTO> result = specialityService.findAll();
         assertEquals(1, result.size());
         assertEquals("Кардиология", result.getFirst().getName());
@@ -52,6 +61,7 @@ class SpecialityServiceTest {
     @Test
     void findById_existingId_returnsDTO() {
         when(specialityRepository.findById(1L)).thenReturn(Optional.of(speciality));
+        when(specialityMapper.toDto(speciality)).thenReturn(specialityResponseDTO);
         assertEquals("Кардиология", specialityService.findById(1L).getName());
     }
 

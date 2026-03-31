@@ -1,6 +1,7 @@
 package nbu.informatics.medicalRecordSystem.service;
 
 import jakarta.persistence.EntityNotFoundException;
+import nbu.informatics.medicalRecordSystem.mapper.DoctorMapper;
 import nbu.informatics.medicalRecordSystem.model.dto.doctor.DoctorCreateRequestDTO;
 import nbu.informatics.medicalRecordSystem.model.dto.doctor.DoctorResponseDTO;
 import nbu.informatics.medicalRecordSystem.model.dto.doctor.DoctorUpdateRequestDTO;
@@ -43,6 +44,8 @@ class DoctorServiceTest {
     private UserRepository userRepository;
     @Mock
     private PatientRepository patientRepository;
+    @Mock
+    private DoctorMapper doctorMapper;
 
     @InjectMocks
     private DoctorService doctorService;
@@ -50,6 +53,7 @@ class DoctorServiceTest {
     private Doctor doctor;
     private Speciality speciality;
     private User user;
+    private DoctorResponseDTO doctorResponseDTO;
 
     @BeforeEach
     void setUp() {
@@ -68,6 +72,12 @@ class DoctorServiceTest {
         doctor.setGp(true);
         doctor.setSpeciality(speciality);
         doctor.setUser(user);
+
+        doctorResponseDTO = new DoctorResponseDTO();
+        doctorResponseDTO.setId(1L);
+        doctorResponseDTO.setName("Д-р Иванов");
+        doctorResponseDTO.setGp(true);
+        doctorResponseDTO.setSpecialityName("Кардиология");
     }
 
     // --- findAll ---
@@ -75,6 +85,7 @@ class DoctorServiceTest {
     @Test
     void findAll_returnsMappedDTOs() {
         when(doctorRepository.findAll()).thenReturn(List.of(doctor));
+        when(doctorMapper.toDto(doctor)).thenReturn(doctorResponseDTO);
 
         List<DoctorResponseDTO> result = doctorService.findAll();
 
@@ -94,6 +105,7 @@ class DoctorServiceTest {
     @Test
     void findById_existingId_returnsDTO() {
         when(doctorRepository.findById(1L)).thenReturn(Optional.of(doctor));
+        when(doctorMapper.toDto(doctor)).thenReturn(doctorResponseDTO);
 
         DoctorResponseDTO result = doctorService.findById(1L);
 
@@ -228,6 +240,7 @@ class DoctorServiceTest {
     @Test
     void findAllGps_returnsOnlyGps() {
         when(doctorRepository.findByIsGpTrue()).thenReturn(List.of(doctor));
+        when(doctorMapper.toDto(doctor)).thenReturn(doctorResponseDTO);
 
         List<DoctorResponseDTO> result = doctorService.findAllGps();
 

@@ -2,6 +2,7 @@ package nbu.informatics.medicalRecordSystem.service;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import nbu.informatics.medicalRecordSystem.mapper.ExaminationMapper;
 import nbu.informatics.medicalRecordSystem.model.dto.examination.ExaminationCreateRequestDTO;
 import nbu.informatics.medicalRecordSystem.model.dto.examination.ExaminationResponseDTO;
 import nbu.informatics.medicalRecordSystem.model.dto.examination.ExaminationUpdateRequestDTO;
@@ -36,18 +37,19 @@ public class ExaminationService {
     private final DoctorRepository doctorRepository;
     private final DiagnosisRepository diagnosisRepository;
     private final HealthInsuranceRepository healthInsuranceRepository;
+    private final ExaminationMapper examinationMapper;
 
     @Transactional(readOnly = true)
     public List<ExaminationResponseDTO> findAll() {
         return examinationRepository.findAll()
                 .stream()
-                .map(this::toResponseDTO)
+                .map(examinationMapper::toDto)
                 .toList();
     }
 
     @Transactional(readOnly = true)
     public ExaminationResponseDTO findById(Long id) {
-        return toResponseDTO(getExaminationOrThrow(id));
+        return examinationMapper.toDto(getExaminationOrThrow(id));
     }
 
     public ExaminationResponseDTO findByIdForDoctor(Long id, User currentUser) {
@@ -57,7 +59,7 @@ public class ExaminationService {
             verifyDoctorOwnership(examination, currentUser);
         }
 
-        return toResponseDTO(examination);
+        return examinationMapper.toDto(examination);
     }
 
     public Long getDiagnosisIdForDoctor(Long examinationId, User currentUser) {
@@ -85,21 +87,32 @@ public class ExaminationService {
     @Transactional(readOnly = true)
     public List<ExaminationResponseDTO> findAllForUser(User user) {
         return switch (user.getRole()) {
-            case ADMIN -> examinationRepository.findAll()
-                    .stream().map(this::toResponseDTO).toList();
+            case ADMIN -> examinationRepository
+                    .findAll()
+                    .stream()
+                    .map(examinationMapper::toDto)
+                    .toList();
 
             case DOCTOR -> {
-                Doctor doctor = doctorRepository.findByUser(user)
+                Doctor doctor = doctorRepository
+                        .findByUser(user)
                         .orElseThrow(() -> new EntityNotFoundException("Лекарят не е намерен"));
-                yield examinationRepository.findByDoctor(doctor)
-                        .stream().map(this::toResponseDTO).toList();
+                yield examinationRepository
+                        .findByDoctor(doctor)
+                        .stream()
+                        .map(examinationMapper::toDto)
+                        .toList();
             }
 
             case PATIENT -> {
-                Patient patient = patientRepository.findByUser(user)
+                Patient patient = patientRepository
+                        .findByUser(user)
                         .orElseThrow(() -> new EntityNotFoundException("Пациентът не е намерен"));
-                yield examinationRepository.findByPatient(patient)
-                        .stream().map(this::toResponseDTO).toList();
+                yield examinationRepository
+                        .findByPatient(patient)
+                        .stream()
+                        .map(examinationMapper::toDto)
+                        .toList();
             }
 
             case PENDING -> List.of();
@@ -206,20 +219,6 @@ public class ExaminationService {
     private Examination getExaminationOrThrow(Long id) {
         return examinationRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Преглед с id " + id + " не е намерен"));
-    }
-
-    private ExaminationResponseDTO toResponseDTO(Examination examination) {
-        return new ExaminationResponseDTO(
-                examination.getId(),
-                examination.getDateTime(),
-                examination.getDoctor().getName(),
-                examination.getPatient().getName(),
-                examination.getDiagnosis().getName(),
-                examination.getTreatment(),
-                examination.getPrice(),
-                examination.getPaidBy(),
-                examination.getSickLeave() != null
-        );
     }
 
     private void verifyDoctorOwnership(Examination examination, User currentUser) {

@@ -1,6 +1,7 @@
 package nbu.informatics.medicalRecordSystem.service;
 
 import jakarta.persistence.EntityNotFoundException;
+import nbu.informatics.medicalRecordSystem.mapper.PatientMapper;
 import nbu.informatics.medicalRecordSystem.model.dto.patient.PatientCreateRequestDTO;
 import nbu.informatics.medicalRecordSystem.model.dto.patient.PatientResponseDTO;
 import nbu.informatics.medicalRecordSystem.model.dto.patient.PatientUpdateRequestDTO;
@@ -41,6 +42,8 @@ class PatientServiceTest {
     private UserRepository userRepository;
     @Mock
     private ExaminationRepository examinationRepository;
+    @Mock
+    private PatientMapper patientMapper;
 
     @InjectMocks
     private PatientService patientService;
@@ -48,6 +51,7 @@ class PatientServiceTest {
     private Patient patient;
     private Doctor gp;
     private User user;
+    private PatientResponseDTO patientResponseDTO;
 
     @BeforeEach
     void setUp() {
@@ -73,6 +77,12 @@ class PatientServiceTest {
         patient.setEgn("9001011234");
         patient.setGp(gp);
         patient.setUser(user);
+
+        patientResponseDTO = new PatientResponseDTO();
+        patientResponseDTO.setId(1L);
+        patientResponseDTO.setName("Петър Петров");
+        patientResponseDTO.setEgn("9001011234");
+        patientResponseDTO.setGpName("Д-р Иванов");
     }
 
     // --- findAll ---
@@ -80,6 +90,7 @@ class PatientServiceTest {
     @Test
     void findAll_returnsMappedDTOs() {
         when(patientRepository.findAll()).thenReturn(List.of(patient));
+        when(patientMapper.toDto(patient)).thenReturn(patientResponseDTO);
 
         List<PatientResponseDTO> result = patientService.findAll();
 
@@ -99,6 +110,7 @@ class PatientServiceTest {
     @Test
     void findById_existingId_returnsDTO() {
         when(patientRepository.findById(1L)).thenReturn(Optional.of(patient));
+        when(patientMapper.toDto(patient)).thenReturn(patientResponseDTO);
 
         PatientResponseDTO result = patientService.findById(1L);
 

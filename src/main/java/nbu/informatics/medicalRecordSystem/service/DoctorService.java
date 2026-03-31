@@ -2,6 +2,7 @@ package nbu.informatics.medicalRecordSystem.service;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import nbu.informatics.medicalRecordSystem.mapper.DoctorMapper;
 import nbu.informatics.medicalRecordSystem.model.dto.doctor.DoctorCreateRequestDTO;
 import nbu.informatics.medicalRecordSystem.model.dto.doctor.DoctorResponseDTO;
 import nbu.informatics.medicalRecordSystem.model.dto.doctor.DoctorUpdateRequestDTO;
@@ -25,18 +26,19 @@ public class DoctorService {
     private final PatientRepository patientRepository;
     private final SpecialityRepository specialityRepository;
     private final UserRepository userRepository;
+    private final DoctorMapper doctorMapper;
 
     public List<DoctorResponseDTO> findAll() {
         return doctorRepository.findAll()
                 .stream()
-                .map(this::toResponseDTO)
+                .map(doctorMapper::toDto)
                 .toList();
     }
 
     public DoctorResponseDTO findById(Long id) {
         Doctor doctor = doctorRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Лекар с id " + id + " не е намерен"));
-        return toResponseDTO(doctor);
+        return doctorMapper.toDto(doctor);
     }
 
     @Transactional
@@ -97,18 +99,7 @@ public class DoctorService {
     public List<DoctorResponseDTO> findAllGps() {
         return doctorRepository.findByIsGpTrue()
                 .stream()
-                .map(this::toResponseDTO)
+                .map(doctorMapper::toDto)
                 .toList();
-    }
-
-    private DoctorResponseDTO toResponseDTO(Doctor doctor) {
-        return new DoctorResponseDTO(
-                doctor.getId(),
-                doctor.getName(),
-                doctor.isGp(),
-                doctor.getSpeciality().getId(),
-                doctor.getSpeciality().getName(),
-                doctor.getUser().getUsername()
-        );
     }
 }

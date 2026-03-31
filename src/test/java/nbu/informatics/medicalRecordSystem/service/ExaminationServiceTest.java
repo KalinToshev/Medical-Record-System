@@ -1,6 +1,7 @@
 package nbu.informatics.medicalRecordSystem.service;
 
 import jakarta.persistence.EntityNotFoundException;
+import nbu.informatics.medicalRecordSystem.mapper.ExaminationMapper;
 import nbu.informatics.medicalRecordSystem.model.dto.examination.ExaminationCreateRequestDTO;
 import nbu.informatics.medicalRecordSystem.model.dto.examination.ExaminationResponseDTO;
 import nbu.informatics.medicalRecordSystem.model.dto.examination.ExaminationUpdateRequestDTO;
@@ -55,6 +56,8 @@ class ExaminationServiceTest {
     private DiagnosisRepository diagnosisRepository;
     @Mock
     private HealthInsuranceRepository healthInsuranceRepository;
+    @Mock
+    private ExaminationMapper examinationMapper;
 
     @InjectMocks
     private ExaminationService examinationService;
@@ -64,6 +67,7 @@ class ExaminationServiceTest {
     private Diagnosis diagnosis;
     private User doctorUser;
     private User adminUser;
+    private ExaminationResponseDTO examinationResponseDTO;
 
     @BeforeEach
     void setUp() {
@@ -90,6 +94,11 @@ class ExaminationServiceTest {
         diagnosis = new Diagnosis();
         diagnosis.setId(1L);
         diagnosis.setName("Грип");
+
+        examinationResponseDTO = new ExaminationResponseDTO();
+        examinationResponseDTO.setId(1L);
+        examinationResponseDTO.setDoctorName("Д-р Иванов");
+        examinationResponseDTO.setPatientName("Петър Петров");
     }
 
     // --- findAll ---
@@ -98,6 +107,7 @@ class ExaminationServiceTest {
     void findAll_returnsAllExaminations() {
         Examination e = buildExamination();
         when(examinationRepository.findAll()).thenReturn(List.of(e));
+        when(examinationMapper.toDto(e)).thenReturn(examinationResponseDTO);
 
         List<ExaminationResponseDTO> result = examinationService.findAll();
 
@@ -117,6 +127,7 @@ class ExaminationServiceTest {
     void findById_existingId_returnsDTO() {
         Examination e = buildExamination();
         when(examinationRepository.findById(1L)).thenReturn(Optional.of(e));
+        when(examinationMapper.toDto(e)).thenReturn(examinationResponseDTO);
 
         ExaminationResponseDTO result = examinationService.findById(1L);
 

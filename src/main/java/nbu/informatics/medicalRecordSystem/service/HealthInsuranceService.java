@@ -2,6 +2,7 @@ package nbu.informatics.medicalRecordSystem.service;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import nbu.informatics.medicalRecordSystem.mapper.HealthInsuranceMapper;
 import nbu.informatics.medicalRecordSystem.model.dto.healthInsurance.HealthInsuranceRequestDTO;
 import nbu.informatics.medicalRecordSystem.model.dto.healthInsurance.HealthInsuranceResponseDTO;
 import nbu.informatics.medicalRecordSystem.model.entity.HealthInsurance;
@@ -20,12 +21,13 @@ public class HealthInsuranceService {
 
     private final HealthInsuranceRepository healthInsuranceRepository;
     private final PatientRepository patientRepository;
+    private final HealthInsuranceMapper healthInsuranceMapper;
 
     public List<HealthInsuranceResponseDTO> findByPatient(Long patientId) {
         Patient patient = getPatientOrThrow(patientId);
         return healthInsuranceRepository.findByPatient(patient)
                 .stream()
-                .map(this::toResponseDTO)
+                .map(healthInsuranceMapper::toDto)
                 .toList();
     }
 
@@ -72,14 +74,5 @@ public class HealthInsuranceService {
     private Patient getPatientOrThrow(Long patientId) {
         return patientRepository.findById(patientId)
                 .orElseThrow(() -> new EntityNotFoundException("Пациентът не е намерен"));
-    }
-
-    private HealthInsuranceResponseDTO toResponseDTO(HealthInsurance insurance) {
-        return new HealthInsuranceResponseDTO(
-                insurance.getId(),
-                insurance.getYear(),
-                insurance.getMonth(),
-                insurance.isPaid()
-        );
     }
 }

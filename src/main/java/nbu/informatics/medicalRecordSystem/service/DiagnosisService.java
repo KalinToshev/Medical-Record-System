@@ -2,6 +2,7 @@ package nbu.informatics.medicalRecordSystem.service;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import nbu.informatics.medicalRecordSystem.mapper.DiagnosisMapper;
 import nbu.informatics.medicalRecordSystem.model.dto.diagnosis.DiagnosisRequestDTO;
 import nbu.informatics.medicalRecordSystem.model.dto.diagnosis.DiagnosisResponseDTO;
 import nbu.informatics.medicalRecordSystem.model.entity.Diagnosis;
@@ -18,18 +19,19 @@ public class DiagnosisService {
 
     private final DiagnosisRepository diagnosisRepository;
     private final ExaminationRepository examinationRepository;
+    private final DiagnosisMapper diagnosisMapper;
 
     public List<DiagnosisResponseDTO> findAll() {
         return diagnosisRepository.findAll()
                 .stream()
-                .map(this::toResponseDTO)
+                .map(diagnosisMapper::toDto)
                 .toList();
     }
 
     public DiagnosisResponseDTO findById(Long id) {
         Diagnosis diagnosis = diagnosisRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Диагноза с id " + id + " не е намерена"));
-        return toResponseDTO(diagnosis);
+        return diagnosisMapper.toDto(diagnosis);
     }
 
     @Transactional
@@ -60,12 +62,5 @@ public class DiagnosisService {
             );
         }
         diagnosisRepository.deleteById(id);
-    }
-
-    private DiagnosisResponseDTO toResponseDTO(Diagnosis diagnosis) {
-        return new DiagnosisResponseDTO(
-                diagnosis.getId(),
-                diagnosis.getName()
-        );
     }
 }

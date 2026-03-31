@@ -1,6 +1,7 @@
 package nbu.informatics.medicalRecordSystem.service;
 
 import jakarta.persistence.EntityNotFoundException;
+import nbu.informatics.medicalRecordSystem.mapper.HealthInsuranceMapper;
 import nbu.informatics.medicalRecordSystem.model.dto.healthInsurance.HealthInsuranceRequestDTO;
 import nbu.informatics.medicalRecordSystem.model.dto.healthInsurance.HealthInsuranceResponseDTO;
 import nbu.informatics.medicalRecordSystem.model.entity.HealthInsurance;
@@ -32,17 +33,26 @@ class HealthInsuranceServiceTest {
     private HealthInsuranceRepository healthInsuranceRepository;
     @Mock
     private PatientRepository patientRepository;
+    @Mock
+    private HealthInsuranceMapper healthInsuranceMapper;
 
     @InjectMocks
     private HealthInsuranceService healthInsuranceService;
 
     private Patient patient;
+    private HealthInsuranceResponseDTO healthInsuranceResponseDTO;
 
     @BeforeEach
     void setUp() {
         patient = new Patient();
         patient.setId(1L);
         patient.setName("Петър Петров");
+
+        healthInsuranceResponseDTO = new HealthInsuranceResponseDTO();
+        healthInsuranceResponseDTO.setId(1L);
+        healthInsuranceResponseDTO.setYear(2026);
+        healthInsuranceResponseDTO.setMonth(3);
+        healthInsuranceResponseDTO.setPaid(true);
     }
 
     // --- findByPatient ---
@@ -58,6 +68,7 @@ class HealthInsuranceServiceTest {
 
         when(patientRepository.findById(1L)).thenReturn(Optional.of(patient));
         when(healthInsuranceRepository.findByPatient(patient)).thenReturn(List.of(ins));
+        when(healthInsuranceMapper.toDto(ins)).thenReturn(healthInsuranceResponseDTO);
 
         List<HealthInsuranceResponseDTO> result =
                 healthInsuranceService.findByPatient(1L);

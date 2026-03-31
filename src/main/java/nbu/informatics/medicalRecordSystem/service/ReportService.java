@@ -1,13 +1,14 @@
 package nbu.informatics.medicalRecordSystem.service;
 
 import lombok.RequiredArgsConstructor;
+import nbu.informatics.medicalRecordSystem.mapper.ExaminationMapper;
+import nbu.informatics.medicalRecordSystem.mapper.PatientMapper;
 import nbu.informatics.medicalRecordSystem.model.dto.examination.ExaminationResponseDTO;
 import nbu.informatics.medicalRecordSystem.model.dto.patient.PatientResponseDTO;
 import nbu.informatics.medicalRecordSystem.model.dto.report.MonthCountProjection;
 import nbu.informatics.medicalRecordSystem.model.dto.report.NameAmountProjection;
 import nbu.informatics.medicalRecordSystem.model.dto.report.NameCountProjection;
 import nbu.informatics.medicalRecordSystem.model.entity.Examination;
-import nbu.informatics.medicalRecordSystem.model.entity.Patient;
 import nbu.informatics.medicalRecordSystem.repository.ExaminationRepository;
 import nbu.informatics.medicalRecordSystem.repository.ExaminationSpecifications;
 import nbu.informatics.medicalRecordSystem.repository.PatientRepository;
@@ -27,11 +28,13 @@ public class ReportService {
     private final ExaminationRepository examinationRepository;
     private final PatientRepository patientRepository;
     private final SickLeaveRepository sickLeaveRepository;
+    private final ExaminationMapper examinationMapper;
+    private final PatientMapper patientMapper;
 
     public List<PatientResponseDTO> findByDiagnosis(Long diagnosisId) {
         return examinationRepository.findByDiagnosisId(diagnosisId)
                 .stream()
-                .map(e -> toPatientDTO(e.getPatient()))
+                .map(e -> patientMapper.toDto(e.getPatient()))
                 .collect(Collectors.toMap(
                         PatientResponseDTO::getId,
                         p -> p,
@@ -44,7 +47,7 @@ public class ReportService {
 
     public List<PatientResponseDTO> findByGp(Long gpId) {
         return patientRepository.findByGpId(gpId)
-                .stream().map(this::toPatientDTO).toList();
+                .stream().map(patientMapper::toDto).toList();
     }
 
     public List<NameCountProjection> countPatientsPerGp() {
@@ -53,7 +56,7 @@ public class ReportService {
 
     public List<ExaminationResponseDTO> findPatientHistory(Long patientId) {
         return examinationRepository.findByPatientId(patientId)
-                .stream().map(this::toExaminationDTO).toList();
+                .stream().map(examinationMapper::toDto).toList();
     }
 
     public List<ExaminationResponseDTO> findByDoctorAndPeriod(
@@ -73,7 +76,7 @@ public class ReportService {
 
         return examinationRepository.findAll(spec)
                 .stream()
-                .map(this::toExaminationDTO)
+                .map(examinationMapper::toDto)
                 .toList();
     }
 
@@ -107,23 +110,5 @@ public class ReportService {
         if (all.isEmpty()) return List.of();
         Long max = all.getFirst().count();
         return all.stream().filter(r -> r.count().equals(max)).toList();
-    }
-
-    private ExaminationResponseDTO toExaminationDTO(Examination e) {
-        return new ExaminationResponseDTO(
-                e.getId(), e.getDateTime(),
-                e.getDoctor().getName(), e.getPatient().getName(),
-                e.getDiagnosis().getName(), e.getTreatment(),
-                e.getPrice(), e.getPaidBy(),
-                e.getSickLeave() != null
-        );
-    }
-
-    private PatientResponseDTO toPatientDTO(Patient p) {
-        return new PatientResponseDTO(
-                p.getId(), p.getName(), p.getEgn(),
-                p.getGp().getId(), p.getGp().getName(),
-                p.getUser().getUsername()
-        );
     }
 }
