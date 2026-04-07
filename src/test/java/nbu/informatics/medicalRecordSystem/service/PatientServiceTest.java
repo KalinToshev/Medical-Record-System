@@ -85,8 +85,6 @@ class PatientServiceTest {
         patientResponseDTO.setGpName("Д-р Иванов");
     }
 
-    // --- findAll ---
-
     @Test
     void findAll_returnsMappedDTOs() {
         when(patientRepository.findAll()).thenReturn(List.of(patient));
@@ -105,8 +103,6 @@ class PatientServiceTest {
         assertTrue(patientService.findAll().isEmpty());
     }
 
-    // --- findById ---
-
     @Test
     void findById_existingId_returnsDTO() {
         when(patientRepository.findById(1L)).thenReturn(Optional.of(patient));
@@ -123,8 +119,6 @@ class PatientServiceTest {
         when(patientRepository.findById(99L)).thenReturn(Optional.empty());
         assertThrows(EntityNotFoundException.class, () -> patientService.findById(99L));
     }
-
-    // --- create ---
 
     @Test
     void create_validDTO_savesPatient() {
@@ -169,8 +163,6 @@ class PatientServiceTest {
         assertThrows(EntityNotFoundException.class, () -> patientService.create(dto));
     }
 
-    // --- update ---
-
     @Test
     void update_validDTO_updatesPatient() {
         PatientUpdateRequestDTO dto = new PatientUpdateRequestDTO();
@@ -207,8 +199,6 @@ class PatientServiceTest {
 
         assertThrows(EntityNotFoundException.class, () -> patientService.update(1L, dto));
     }
-
-    // --- delete ---
 
     @Test
     void delete_callsRepository() {

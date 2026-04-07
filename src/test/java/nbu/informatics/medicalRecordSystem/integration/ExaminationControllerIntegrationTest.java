@@ -17,9 +17,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
 class ExaminationControllerIntegrationTest extends BaseIntegrationTest {
-
-    // --- Права на достъп ---
-
     @Test
     void listExaminations_asAdmin_seesAll() throws Exception {
         mockMvc.perform(get("/examinations")
@@ -61,8 +58,6 @@ class ExaminationControllerIntegrationTest extends BaseIntegrationTest {
                 .andExpect(forwardedUrl("/error/403"));
     }
 
-    // --- Create ---
-
     @Test
     void create_validDTO_savesExamination() throws Exception {
         mockMvc.perform(post("/examinations/new")
@@ -92,8 +87,6 @@ class ExaminationControllerIntegrationTest extends BaseIntegrationTest {
                 .andExpect(view().name("examinations/form"))
                 .andExpect(model().hasErrors());
     }
-
-    // --- Филтриране според роля ---
 
     @Test
     void listExaminations_asPatient_seesOnlyOwn() throws Exception {

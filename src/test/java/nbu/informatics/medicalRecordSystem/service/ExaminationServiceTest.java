@@ -101,8 +101,6 @@ class ExaminationServiceTest {
         examinationResponseDTO.setPatientName("Петър Петров");
     }
 
-    // --- findAll ---
-
     @Test
     void findAll_returnsAllExaminations() {
         Examination e = buildExamination();
@@ -121,8 +119,6 @@ class ExaminationServiceTest {
         assertTrue(examinationService.findAll().isEmpty());
     }
 
-    // --- findById ---
-
     @Test
     void findById_existingId_returnsDTO() {
         Examination e = buildExamination();
@@ -140,8 +136,6 @@ class ExaminationServiceTest {
         assertThrows(EntityNotFoundException.class, () -> examinationService.findById(99L));
     }
 
-    // --- determinePayee ---
-
     @Test
     void determinePayee_allSixMonthsPaid_returnsNHIF() {
         when(healthInsuranceRepository.existsByPatientAndYearAndMonthAndPaidTrue(
@@ -154,7 +148,6 @@ class ExaminationServiceTest {
 
     @Test
     void determinePayee_oneMonthNotPaid_returnsPatient() {
-        // Първият месец не е платен, останалите са
         when(healthInsuranceRepository.existsByPatientAndYearAndMonthAndPaidTrue(
                 any(), anyInt(), anyInt()))
                 .thenReturn(false)
@@ -178,8 +171,6 @@ class ExaminationServiceTest {
 
         assertEquals(PaidBy.PATIENT, result);
     }
-
-    // --- create ---
 
     @Test
     void create_validDTO_savesExamination() {
@@ -248,8 +239,6 @@ class ExaminationServiceTest {
         assertThrows(EntityNotFoundException.class,
                 () -> examinationService.create(dto, doctorUser));
     }
-
-    // --- update ---
 
     @Test
     void update_ownExamination_updatesSuccessfully() {
@@ -331,8 +320,6 @@ class ExaminationServiceTest {
         assertNull(e.getSickLeave());
     }
 
-    // --- delete ---
-
     @Test
     void delete_existingId_deletesSuccessfully() {
         Examination e = buildExamination();
@@ -342,8 +329,6 @@ class ExaminationServiceTest {
 
         verify(examinationRepository).delete(e);
     }
-
-    // --- helper ---
 
     private Examination buildExamination() {
         Examination e = new Examination();

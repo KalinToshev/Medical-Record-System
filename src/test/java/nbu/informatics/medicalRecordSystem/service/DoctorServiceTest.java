@@ -80,8 +80,6 @@ class DoctorServiceTest {
         doctorResponseDTO.setSpecialityName("Кардиология");
     }
 
-    // --- findAll ---
-
     @Test
     void findAll_returnsMappedDTOs() {
         when(doctorRepository.findAll()).thenReturn(List.of(doctor));
@@ -100,8 +98,6 @@ class DoctorServiceTest {
         assertTrue(doctorService.findAll().isEmpty());
     }
 
-    // --- findById ---
-
     @Test
     void findById_existingId_returnsDTO() {
         when(doctorRepository.findById(1L)).thenReturn(Optional.of(doctor));
@@ -118,8 +114,6 @@ class DoctorServiceTest {
         when(doctorRepository.findById(99L)).thenReturn(Optional.empty());
         assertThrows(EntityNotFoundException.class, () -> doctorService.findById(99L));
     }
-
-    // --- create ---
 
     @Test
     void create_validDTO_savesDoctor() {
@@ -163,8 +157,6 @@ class DoctorServiceTest {
 
         assertThrows(EntityNotFoundException.class, () -> doctorService.create(dto));
     }
-
-    // --- update ---
 
     @Test
     void update_validDTO_updatesDoctor() {
@@ -210,16 +202,14 @@ class DoctorServiceTest {
     void update_removeGpStatus_whenHasPatients_throwsException() {
         DoctorUpdateRequestDTO dto = new DoctorUpdateRequestDTO();
         dto.setName("Д-р Иванов");
-        dto.setGp(false); // опитваме да премахнем GP статуса
+        dto.setGp(false);
         dto.setSpecialityId(1L);
 
         when(doctorRepository.findById(1L)).thenReturn(Optional.of(doctor));
-        when(patientRepository.countByGpId(1L)).thenReturn(3L); // има пациенти
+        when(patientRepository.countByGpId(1L)).thenReturn(3L);
 
         assertThrows(IllegalStateException.class, () -> doctorService.update(1L, dto));
     }
-
-    // --- delete ---
 
     @Test
     void delete_callsRepository() {
@@ -234,8 +224,6 @@ class DoctorServiceTest {
         assertThrows(IllegalStateException.class, () -> doctorService.delete(1L));
         verify(doctorRepository, never()).deleteById(any());
     }
-
-    // --- findAllGps ---
 
     @Test
     void findAllGps_returnsOnlyGps() {

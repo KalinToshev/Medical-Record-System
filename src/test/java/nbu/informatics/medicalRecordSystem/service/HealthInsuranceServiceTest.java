@@ -55,8 +55,6 @@ class HealthInsuranceServiceTest {
         healthInsuranceResponseDTO.setPaid(true);
     }
 
-    // --- findByPatient ---
-
     @Test
     void findByPatient_returnsInsurances() {
         HealthInsurance ins = new HealthInsurance();
@@ -84,8 +82,6 @@ class HealthInsuranceServiceTest {
         assertThrows(EntityNotFoundException.class,
                 () -> healthInsuranceService.findByPatient(99L));
     }
-
-    // --- create ---
 
     @Test
     void create_validDTO_savesInsurance() {
@@ -133,8 +129,6 @@ class HealthInsuranceServiceTest {
         assertThrows(EntityNotFoundException.class,
                 () -> healthInsuranceService.create(99L, dto));
     }
-
-    // --- delete ---
 
     @Test
     void delete_validEntry_deletesSuccessfully() {

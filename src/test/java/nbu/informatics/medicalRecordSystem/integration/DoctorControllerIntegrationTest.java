@@ -21,9 +21,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
 class DoctorControllerIntegrationTest extends BaseIntegrationTest {
-
-    // --- Права на достъп ---
-
     @Test
     void listDoctors_asAdmin_isOk() throws Exception {
         mockMvc.perform(get("/doctors")
@@ -48,8 +45,6 @@ class DoctorControllerIntegrationTest extends BaseIntegrationTest {
                 .andExpect(status().isForbidden())
                 .andExpect(forwardedUrl("/error/403"));
     }
-
-    // --- Create ---
 
     @Test
     void createForm_asAdmin_isOk() throws Exception {
@@ -91,8 +86,6 @@ class DoctorControllerIntegrationTest extends BaseIntegrationTest {
                 .andExpect(model().hasErrors());
     }
 
-    // --- Update ---
-
     @Test
     void editForm_asAdmin_isOk() throws Exception {
         mockMvc.perform(get("/doctors/" + doctor.getId() + "/edit")
@@ -115,8 +108,6 @@ class DoctorControllerIntegrationTest extends BaseIntegrationTest {
         Doctor updated = doctorRepository.findById(doctor.getId()).orElseThrow();
         assertEquals("Д-р Обновен", updated.getName());
     }
-
-    // --- Delete ---
 
     @Test
     void delete_doctorWithoutPatients_redirectsToDoctors() throws Exception {
