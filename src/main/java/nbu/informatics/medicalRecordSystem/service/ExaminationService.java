@@ -30,6 +30,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class ExaminationService {
 
     private final ExaminationRepository examinationRepository;
@@ -39,7 +40,6 @@ public class ExaminationService {
     private final HealthInsuranceRepository healthInsuranceRepository;
     private final ExaminationMapper examinationMapper;
 
-    @Transactional(readOnly = true)
     public List<ExaminationResponseDTO> findAll() {
         return examinationRepository.findAll()
                 .stream()
@@ -47,7 +47,6 @@ public class ExaminationService {
                 .toList();
     }
 
-    @Transactional(readOnly = true)
     public ExaminationResponseDTO findById(Long id) {
         return examinationMapper.toDto(getExaminationOrThrow(id));
     }
@@ -84,7 +83,6 @@ public class ExaminationService {
         return new SickLeaveResponseDTO(sl.getId(), sl.getStartDate(), sl.getDays());
     }
 
-    @Transactional(readOnly = true)
     public List<ExaminationResponseDTO> findAllForUser(User user) {
         return switch (user.getRole()) {
             case ADMIN -> examinationRepository
