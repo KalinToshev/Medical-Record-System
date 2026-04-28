@@ -61,6 +61,11 @@
                     </td>
                     <td class="px-6 py-4">
                         <div class="flex items-center justify-end gap-2">
+                            <a th:href="@{/patients/{id}/history(id=${e.patientId})}"
+                               sec:authorize="hasAnyRole('ADMIN','DOCTOR')"
+                               class="px-3 py-1.5 text-xs font-medium text-teal-600 bg-teal-50 hover:bg-teal-100 rounded-lg transition-colors">
+                                История
+                            </a>
                             <a th:href="@{/examinations/{id}/edit(id=${e.id})}"
                                sec:authorize="hasAnyRole('DOCTOR','ADMIN')"
                                class="px-3 py-1.5 text-xs font-medium text-teal-700 bg-teal-50 hover:bg-teal-100 rounded-lg transition-colors">

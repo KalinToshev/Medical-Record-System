@@ -15,6 +15,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class ExaminationResponseDTO {
     private Long id;
+    private Long patientId;
     private LocalDateTime dateTime;
     private String doctorName;
     private String patientName;

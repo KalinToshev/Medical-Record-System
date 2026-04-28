@@ -42,4 +42,6 @@ public interface ExaminationRepository extends JpaRepository<Examination, Long>,
     long countByDiagnosisId(Long diagnosisId);
 
     long countByPatientId(Long patientId);
+
+    boolean existsByDoctorAndPatient(Doctor doctor, Patient patient);
 }

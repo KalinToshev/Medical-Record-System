@@ -13,6 +13,8 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.util.Comparator;
 import java.util.List;
 
 @Service
@@ -28,6 +30,22 @@ public class HealthInsuranceService {
         Patient patient = getPatientOrThrow(patientId);
         return healthInsuranceRepository.findByPatient(patient)
                 .stream()
+                .map(healthInsuranceMapper::toDto)
+                .toList();
+    }
+
+    public List<HealthInsuranceResponseDTO> findLast6MonthsByPatient(Long patientId) {
+        Patient patient = getPatientOrThrow(patientId);
+        LocalDate cutoff = LocalDate.now().minusMonths(5).withDayOfMonth(1);
+
+        return healthInsuranceRepository.findByPatient(patient).stream()
+                .filter(hi -> {
+                    LocalDate hiDate = LocalDate.of(hi.getYear(), hi.getMonth(), 1);
+                    return !hiDate.isBefore(cutoff);
+                })
+                .sorted(Comparator
+                        .comparing(HealthInsurance::getYear).reversed()
+                        .thenComparing(Comparator.comparing(HealthInsurance::getMonth).reversed()))
                 .map(healthInsuranceMapper::toDto)
                 .toList();
     }

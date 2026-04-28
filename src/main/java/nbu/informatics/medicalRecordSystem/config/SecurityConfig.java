@@ -31,6 +31,7 @@ public class SecurityConfig {
                         .requestMatchers("/pending").hasRole("PENDING")
                         .requestMatchers("/admin/users/**").hasRole("ADMIN")
                         .requestMatchers("/doctors/**").hasRole("ADMIN")
+                        .requestMatchers("/patients/*/history").hasAnyRole("ADMIN", "DOCTOR", "PATIENT")
                         .requestMatchers("/patients/**").hasRole("ADMIN")
                         .requestMatchers("/specialities/**").hasRole("ADMIN")
                         .requestMatchers("/diagnoses/**").hasRole("ADMIN")

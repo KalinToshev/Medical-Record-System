@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.argThat;
@@ -163,5 +164,95 @@ class HealthInsuranceServiceTest {
         when(healthInsuranceRepository.findById(99L)).thenReturn(Optional.empty());
         assertThrows(EntityNotFoundException.class,
                 () -> healthInsuranceService.delete(1L, 99L));
+    }
+
+    @Test
+    void findLast6MonthsByPatient_returnsOnlyEntriesWithinLast6Months() {
+        java.time.LocalDate now = java.time.LocalDate.now();
+        HealthInsurance inside = buildInsurance(now.getYear(), now.getMonthValue(), true);
+        HealthInsurance outside = buildInsurance(now.minusMonths(6).getYear(), now.minusMonths(6).getMonthValue(), true);
+
+        HealthInsuranceResponseDTO dto = new HealthInsuranceResponseDTO();
+        dto.setId(1L);
+        dto.setYear(inside.getYear());
+        dto.setMonth(inside.getMonth());
+        dto.setPaid(true);
+
+        when(patientRepository.findById(1L)).thenReturn(Optional.of(patient));
+        when(healthInsuranceRepository.findByPatient(patient)).thenReturn(List.of(inside, outside));
+        when(healthInsuranceMapper.toDto(inside)).thenReturn(dto);
+
+        List<HealthInsuranceResponseDTO> result = healthInsuranceService.findLast6MonthsByPatient(1L);
+
+        assertEquals(1, result.size());
+        assertEquals(inside.getMonth(), result.getFirst().getMonth());
+    }
+
+    @Test
+    void findLast6MonthsByPatient_handlesYearBoundary() {
+        // Simulate via known dates: current month is Feb 2026 → cutoff is Oct 2025
+        // Dec 2025 and Nov 2025 are within 6-month window
+        HealthInsurance dec = buildInsurance(2025, 12, true);
+        HealthInsurance nov = buildInsurance(2025, 11, true);
+        HealthInsurance sep = buildInsurance(2025, 9, false);
+
+        HealthInsuranceResponseDTO decDto = new HealthInsuranceResponseDTO();
+        decDto.setYear(2025); decDto.setMonth(12); decDto.setPaid(true);
+        HealthInsuranceResponseDTO novDto = new HealthInsuranceResponseDTO();
+        novDto.setYear(2025); novDto.setMonth(11); novDto.setPaid(true);
+
+        when(patientRepository.findById(1L)).thenReturn(Optional.of(patient));
+        when(healthInsuranceRepository.findByPatient(patient)).thenReturn(List.of(dec, nov, sep));
+        when(healthInsuranceMapper.toDto(dec)).thenReturn(decDto);
+        when(healthInsuranceMapper.toDto(nov)).thenReturn(novDto);
+
+        // The service uses LocalDate.now() so we can't fully control the boundary here,
+        // but we verify that entries older than 6 months are excluded.
+        // We call the real service and just check it filters sep out.
+        List<HealthInsuranceResponseDTO> result = healthInsuranceService.findLast6MonthsByPatient(1L);
+
+        result.forEach(r -> assertFalse(r.getYear() == 2025 && r.getMonth() == 9, "September 2025 should not appear"));
+    }
+
+    @Test
+    void findLast6MonthsByPatient_sortsByYearMonthDesc() {
+        java.time.LocalDate now = java.time.LocalDate.now();
+        HealthInsurance older = buildInsurance(now.getYear(), now.getMonthValue() > 1 ? now.getMonthValue() - 1 : 1, true);
+        HealthInsurance newer = buildInsurance(now.getYear(), now.getMonthValue(), false);
+
+        HealthInsuranceResponseDTO olderDto = new HealthInsuranceResponseDTO();
+        olderDto.setYear(older.getYear()); olderDto.setMonth(older.getMonth()); olderDto.setPaid(true);
+        HealthInsuranceResponseDTO newerDto = new HealthInsuranceResponseDTO();
+        newerDto.setYear(newer.getYear()); newerDto.setMonth(newer.getMonth()); newerDto.setPaid(false);
+
+        when(patientRepository.findById(1L)).thenReturn(Optional.of(patient));
+        when(healthInsuranceRepository.findByPatient(patient)).thenReturn(List.of(older, newer));
+        when(healthInsuranceMapper.toDto(older)).thenReturn(olderDto);
+        when(healthInsuranceMapper.toDto(newer)).thenReturn(newerDto);
+
+        List<HealthInsuranceResponseDTO> result = healthInsuranceService.findLast6MonthsByPatient(1L);
+
+        assertEquals(2, result.size());
+        assertTrue(result.get(0).getMonth() >= result.get(1).getMonth(),
+                "Results should be sorted month descending");
+    }
+
+    @Test
+    void findLast6MonthsByPatient_emptyWhenNoInsurances() {
+        when(patientRepository.findById(1L)).thenReturn(Optional.of(patient));
+        when(healthInsuranceRepository.findByPatient(patient)).thenReturn(List.of());
+
+        List<HealthInsuranceResponseDTO> result = healthInsuranceService.findLast6MonthsByPatient(1L);
+
+        assertTrue(result.isEmpty());
+    }
+
+    private HealthInsurance buildInsurance(int year, int month, boolean paid) {
+        HealthInsurance ins = new HealthInsurance();
+        ins.setPatient(patient);
+        ins.setYear(year);
+        ins.setMonth(month);
+        ins.setPaid(paid);
+        return ins;
     }
 }

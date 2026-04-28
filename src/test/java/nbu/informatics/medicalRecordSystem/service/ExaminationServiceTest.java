@@ -330,6 +330,40 @@ class ExaminationServiceTest {
         verify(examinationRepository).delete(e);
     }
 
+    @Test
+    void findFullHistoryByPatient_returnsExaminationsSortedByDateDesc() {
+        Examination e1 = buildExamination();
+        e1.setDateTime(LocalDateTime.of(2026, 1, 10, 9, 0));
+
+        Examination e2 = buildExamination();
+        e2.setId(2L);
+        e2.setDateTime(LocalDateTime.of(2026, 3, 20, 14, 0));
+
+        ExaminationResponseDTO dto1 = new ExaminationResponseDTO();
+        dto1.setId(1L);
+        ExaminationResponseDTO dto2 = new ExaminationResponseDTO();
+        dto2.setId(2L);
+
+        when(examinationRepository.findByPatientId(1L)).thenReturn(List.of(e1, e2));
+        when(examinationMapper.toDto(e1)).thenReturn(dto1);
+        when(examinationMapper.toDto(e2)).thenReturn(dto2);
+
+        List<ExaminationResponseDTO> result = examinationService.findFullHistoryByPatient(1L);
+
+        assertEquals(2, result.size());
+        assertEquals(2L, result.get(0).getId());
+        assertEquals(1L, result.get(1).getId());
+    }
+
+    @Test
+    void findFullHistoryByPatient_emptyForPatientWithNoExaminations() {
+        when(examinationRepository.findByPatientId(99L)).thenReturn(List.of());
+
+        List<ExaminationResponseDTO> result = examinationService.findFullHistoryByPatient(99L);
+
+        assertTrue(result.isEmpty());
+    }
+
     private Examination buildExamination() {
         Examination e = new Examination();
         e.setId(1L);

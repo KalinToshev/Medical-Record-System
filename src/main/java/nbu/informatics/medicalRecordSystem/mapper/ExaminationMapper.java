@@ -8,6 +8,7 @@ import org.mapstruct.Mapping;
 @Mapper(componentModel = "spring")
 public interface ExaminationMapper {
     @Mapping(source = "doctor.name", target = "doctorName")
+    @Mapping(source = "patient.id", target = "patientId")
     @Mapping(source = "patient.name", target = "patientName")
     @Mapping(source = "diagnosis.name", target = "diagnosisName")
     @Mapping(target = "hasSickLeave", expression = "java(examination.getSickLeave() != null)")

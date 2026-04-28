@@ -26,6 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 
 @Service
@@ -81,6 +82,14 @@ public class ExaminationService {
         SickLeave sl = examination.getSickLeave();
         if (sl == null) return null;
         return new SickLeaveResponseDTO(sl.getId(), sl.getStartDate(), sl.getDays());
+    }
+
+    public List<ExaminationResponseDTO> findFullHistoryByPatient(Long patientId) {
+        return examinationRepository.findByPatientId(patientId)
+                .stream()
+                .sorted(Comparator.comparing(Examination::getDateTime).reversed())
+                .map(examinationMapper::toDto)
+                .toList();
     }
 
     public List<ExaminationResponseDTO> findAllForUser(User user) {
